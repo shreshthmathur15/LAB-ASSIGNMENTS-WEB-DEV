@@ -1,0 +1,44 @@
+{
+  "name": "krmu-campus-management-system",
+  "version": "1.0.0",
+  "description": "University Campus Management System Backend (Node.js, Express.js, MongoDB, Mongoose, JWT, RBAC, Socket.IO) - Backend Development Capstone Project by Harshwardhan (Roll No: 2501730330, Sem 3, K.R. Mangalam University)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node src/seed/seed.js",
+    "test": "node --test tests/api.test.js"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "mongodb",
+    "mongoose",
+    "jwt",
+    "rbac",
+    "socketio",
+    "campus-management",
+    "krmu"
+  ],
+  "author": "Harshwardhan (Roll No: 2501730330, Sem 3, K.R. Mangalam University)",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

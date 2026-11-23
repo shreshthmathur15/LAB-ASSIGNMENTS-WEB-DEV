@@ -1,0 +1,589 @@
+{
+  "info": {
+    "name": "KRMU Campus Management System API (Harshwardhan - 2501730330)",
+    "_postman_id": "krmu-capstone-2501730330",
+    "description": "Complete Postman Collection v2.1 for Backend Development Capstone Project 1: University Campus Management System.\nStudent: Harshwardhan | Roll No: 2501730330 | Sem 3 | K.R. Mangalam University.\n\nCovers positive, validation failure (400), unauthorized (401), forbidden RBAC (403), not found (404), duplicate conflict (409), and business rule test cases.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "adminToken", "value": "" },
+    { "key": "facultyToken", "value": "" },
+    { "key": "studentToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "studentId", "value": "" },
+    { "key": "otherStudentId", "value": "" },
+    { "key": "courseId", "value": "" },
+    { "key": "sectionId", "value": "" },
+    { "key": "unassignedSectionId", "value": "" },
+    { "key": "attendanceId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01. Health & System",
+      "item": [
+        {
+          "name": "Health Check (200 OK)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Database is connected', () => pm.expect(json.data.database.state).to.eql('connected'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Authentication & Tokens",
+      "item": [
+        {
+          "name": "Login as Admin (Saves adminToken)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Admin login 200 OK', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('adminToken', json.data.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@krmangalam.edu.in\",\n  \"password\": \"Password@123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login as Faculty 1 - Prof. Ananya Sharma (Saves facultyToken)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Faculty login 200 OK', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('facultyToken', json.data.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ananya.sharma@krmangalam.edu.in\",\n  \"password\": \"Password@123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login as Student - Harshwardhan 2501730330 (Saves studentToken & refreshToken)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Student login 200 OK', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('studentToken', json.data.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', json.data.refreshToken);",
+                  "pm.collectionVariables.set('studentId', json.data.user._id);",
+                  "pm.test('Roll number is 2501730330', () => pm.expect(json.data.user.rollNumber).to.eql('2501730330'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"harshwardhan@krmangalam.edu.in\",\n  \"password\": \"Password@123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Register Student - Validation Failure (400 Bad Request)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Validation failed 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has validation errors array', () => pm.expect(pm.response.json().errors.length).to.be.above(0));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"A\",\n  \"email\": \"invalid-email\",\n  \"password\": \"123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Register Admin Role Escalation Blocked (403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Role escalation blocked 403', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Unauthorized Admin\",\n  \"email\": \"fake.admin@krmangalam.edu.in\",\n  \"password\": \"Password@123\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Refresh Access Token (200 OK)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Refresh token 200 OK', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('studentToken', json.data.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', json.data.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/refresh"
+          }
+        },
+        {
+          "name": "Logout (Invalidates Refresh Token)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }],
+            "url": "{{baseUrl}}/api/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Users & RBAC",
+      "item": [
+        {
+          "name": "Get My Profile - Unauthenticated (401 Unauthorized)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Missing token rejected 401', () => pm.response.to.have.status(401));"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/me"
+          }
+        },
+        {
+          "name": "Get My Profile - Harshwardhan (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }],
+            "url": "{{baseUrl}}/api/users/me"
+          }
+        },
+        {
+          "name": "Update My Profile - Harshwardhan (200 OK)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{studentToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+91-9810030330\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/me"
+          }
+        },
+        {
+          "name": "List All Users as Student - RBAC Blocked (403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Insufficient role rejected 403', () => pm.response.to.have.status(403));"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }],
+            "url": "{{baseUrl}}/api/users"
+          }
+        },
+        {
+          "name": "List All Users as Admin (200 OK + Saves otherStudentId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Admin list users 200 OK', () => pm.response.to.have.status(200));",
+                  "const aarav = pm.response.json().data.find(u => u.rollNumber === '2501730331');",
+                  "if (aarav) pm.collectionVariables.set('otherStudentId', aarav._id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/users?role=student&page=1&limit=10"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Courses, Sections & Enrollments",
+      "item": [
+        {
+          "name": "List Courses (200 OK + Saves courseId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('List courses 200 OK', () => pm.response.to.have.status(200));",
+                  "const c = pm.response.json().data.find(x => x.code === 'CSEN2001');",
+                  "if (c) pm.collectionVariables.set('courseId', c._id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }],
+            "url": "{{baseUrl}}/api/courses?semester=3"
+          }
+        },
+        {
+          "name": "Get Non-Existent Course (404 Not Found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Non-existent resource 404', () => pm.response.to.have.status(404));"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/courses/64f1c2e4a1b2c3d4e5f60000"
+          }
+        },
+        {
+          "name": "List Sections (Saves sectionId & unassignedSectionId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('List sections 200 OK', () => pm.response.to.have.status(200));",
+                  "const secs = pm.response.json().data;",
+                  "const s2001 = secs.find(s => s.course && s.course.code === 'CSEN2001');",
+                  "const s2003 = secs.find(s => s.course && s.course.code === 'CSEN2003');",
+                  "if (s2001) pm.collectionVariables.set('sectionId', s2001._id);",
+                  "if (s2003) pm.collectionVariables.set('unassignedSectionId', s2003._id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/sections"
+          }
+        },
+        {
+          "name": "Get My Enrolled Courses - Harshwardhan (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }],
+            "url": "{{baseUrl}}/api/enrollments/my-courses"
+          }
+        },
+        {
+          "name": "Duplicate Enrollment Rejected (409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Duplicate enrollment returns 409', () => pm.response.to.have.status(409));"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"sectionId\": \"{{sectionId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/enrollments"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Attendance & Audit Trail",
+      "item": [
+        {
+          "name": "Mark Attendance for Assigned Section (201 Created + Saves attendanceId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Attendance marked 201', () => pm.response.to.have.status(201));",
+                  "const recs = pm.response.json().data;",
+                  "if (recs && recs.length > 0) pm.collectionVariables.set('attendanceId', recs[0]._id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{facultyToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sectionId\": \"{{sectionId}}\",\n  \"date\": \"2026-11-22\",\n  \"sessionNumber\": 1,\n  \"records\": [\n    { \"studentId\": \"{{studentId}}\", \"status\": \"Present\" },\n    { \"studentId\": \"{{otherStudentId}}\", \"status\": \"Absent\" }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/attendance/mark"
+          }
+        },
+        {
+          "name": "Mark Duplicate Session Attendance (409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Duplicate session attendance 409', () => pm.response.to.have.status(409));"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{facultyToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sectionId\": \"{{sectionId}}\",\n  \"date\": \"2026-11-22\",\n  \"sessionNumber\": 1,\n  \"records\": [\n    { \"studentId\": \"{{studentId}}\", \"status\": \"Present\" }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/attendance/mark"
+          }
+        },
+        {
+          "name": "Mark Attendance for Unassigned Section (403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Unassigned faculty blocked 403', () => pm.response.to.have.status(403));"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{facultyToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sectionId\": \"{{unassignedSectionId}}\",\n  \"date\": \"2026-11-22\",\n  \"records\": [\n    { \"studentId\": \"{{studentId}}\", \"status\": \"Present\" }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/attendance/mark"
+          }
+        },
+        {
+          "name": "Correct Attendance with Audit Log (200 OK)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{facultyToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Excused\",\n  \"reason\": \"Medical leave approved by department coordinator\"\n}"
+            },
+            "url": "{{baseUrl}}/api/attendance/{{attendanceId}}"
+          }
+        },
+        {
+          "name": "Get My Attendance Summary - Harshwardhan (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }],
+            "url": "{{baseUrl}}/api/attendance/my"
+          }
+        },
+        {
+          "name": "Student Viewing Another Student's Attendance (403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Student privacy enforced 403', () => pm.response.to.have.status(403));"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }],
+            "url": "{{baseUrl}}/api/attendance/student/{{otherStudentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Announcements & Real-Time Events",
+      "item": [
+        {
+          "name": "Publish Course Announcement (201 Created + Socket.IO Broadcast)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{facultyToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Backend Capstone Viva Schedule\",\n  \"content\": \"Please bring your Postman collection and repository ready for API flow demonstration.\",\n  \"targetScope\": \"course\",\n  \"course\": \"{{courseId}}\",\n  \"priority\": \"high\"\n}"
+            },
+            "url": "{{baseUrl}}/api/announcements"
+          }
+        },
+        {
+          "name": "List My Scoped Announcements - Harshwardhan (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{studentToken}}" }],
+            "url": "{{baseUrl}}/api/announcements"
+          }
+        },
+        {
+          "name": "View EventEmitter Audit History - Admin (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/events/history"
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Aggregation Reports & CSV Export",
+      "item": [
+        {
+          "name": "Attendance Summary Report (Aggregation Pipeline 1)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{facultyToken}}" }],
+            "url": "{{baseUrl}}/api/reports/attendance-summary"
+          }
+        },
+        {
+          "name": "Low Attendance Defaulters Report <75% (Aggregation Pipeline 2)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/reports/low-attendance?threshold=75"
+          }
+        },
+        {
+          "name": "Course & Section Enrollment Stats (Aggregation Pipeline 3)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/reports/enrollment-stats"
+          }
+        },
+        {
+          "name": "Export Attendance Summary CSV (200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{facultyToken}}" }],
+            "url": "{{baseUrl}}/api/reports/attendance-summary/export"
+          }
+        }
+      ]
+    }
+  ]
+}
